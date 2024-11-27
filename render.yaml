@@ -1,1 +1,35 @@
+
+---
+
+### 5. **Automate in CI/CD Workflow**
+If you're deploying the project using CI/CD (e.g., GitHub Actions), include these commands in your workflow file. Below is an example workflow (`.github/workflows/deploy.yml`):
+
+```yaml
+name: Deploy App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install Dependencies
+      run: |
+        python3 -m venv /home/adminuser/venv
+        source /home/adminuser/venv/bin/activate
+        pip install -r requirements.txt
+
+
 start: streamlit run main.py
