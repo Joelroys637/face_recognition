@@ -1,5 +1,5 @@
 cmake
 dlib==19.24.6
 numpy==1.23.5
-face-recognition
+face_recognition
 streamlit
