@@ -1,4 +1,4 @@
-face_recognition
+face-recognition
 build-essential
 cmake
 python3-dev
