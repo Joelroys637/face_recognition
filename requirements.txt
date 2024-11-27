@@ -1,4 +1,5 @@
 cmake
-dlib
+dlib==19.24.6
 face-recognition
 streamlit
+
