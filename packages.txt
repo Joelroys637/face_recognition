@@ -1,5 +1,9 @@
 build-essential
 cmake
+face_recognition
+dlib==19.24.6
+numpy
+streamlit
 python3-dev
 libboost-python-dev
 libboost-thread-dev
