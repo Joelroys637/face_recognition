@@ -1,5 +1,0 @@
-cmake
-face_recognition
-dlib==19.24.6
-numpy
-streamlit
