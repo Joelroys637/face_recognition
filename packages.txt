@@ -1,9 +1,0 @@
-build-essential
-cmake
-face_recognition
-python3-dev
-libboost-python-dev
-libboost-thread-dev
-libboost-system-dev
-libopenblas-dev
-liblapack-dev
