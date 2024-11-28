@@ -1,0 +1,4 @@
+cmake
+dlib==19.19.0
+face_recognition
+opencv-python==4.10.0.84
