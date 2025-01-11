@@ -8,6 +8,7 @@ from datetime import date
 from PIL import Image
 #importing my own bg module
 import bg_image as bg
+import video_input_css as vd
 
 
 
@@ -130,6 +131,7 @@ def main():
 
             captured_image = st.file_uploader("Choose a image file", type="jpg")
         else:
+            vd.main()
             captured_image = st.camera_input("face")
 
         if captured_image is not None:
