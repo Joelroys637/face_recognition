@@ -132,7 +132,7 @@ def main():
             captured_image = st.file_uploader("Choose a image file", type="jpg")
         else:
             vd.main()
-            captured_image = st.camera_input("face")
+            captured_image = st.camera_input("face recognition")
 
         if captured_image is not None:
         # Convert the image to OpenCV format
