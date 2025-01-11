@@ -46,5 +46,74 @@ def main():
     """,
     unsafe_allow_html=True
     )
-    
-    
+
+    # JavaScript to switch between front and back camera
+    st.markdown(
+    """
+    <script>
+    let videoElement = null;
+    let currentStream = null;
+
+    // Get camera devices
+    async function getDevices() {
+        let devices = await navigator.mediaDevices.enumerateDevices();
+        let videoDevices = devices.filter(device => device.kind === 'videoinput');
+        return videoDevices;
+    }
+
+    // Switch between front and back cameras
+    async function switchCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop()); // Stop previous stream
+        }
+
+        let devices = await getDevices();
+        let frontCamera = devices.find(device => device.label.toLowerCase().includes('front')) || devices[0];
+        let backCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[1];
+
+        let constraints = {
+            video: {
+                deviceId: { exact: backCamera.deviceId }
+            }
+        };
+
+        navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+            if (videoElement) {
+                videoElement.srcObject = stream;
+                currentStream = stream;
+            }
+        }).catch(err => {
+            console.error("Error accessing camera:", err);
+        });
+    }
+
+    // Initialize camera view
+    window.onload = () => {
+        videoElement = document.querySelector("video");
+        switchCamera();  // Load default (back camera)
+    }
+    </script>
+    """,
+    unsafe_allow_html=True
+    )
+
+    # Create a video element to display camera
+    st.markdown(
+    """
+    <video id="camera" autoplay playsinline></video>
+    """,
+    unsafe_allow_html=True
+    )
+
+    # Add a button to switch between front and back camera
+    if st.button('Switch Camera'):
+        st.markdown(
+        """
+        <script>
+        switchCamera();
+        </script>
+        """,
+        unsafe_allow_html=True
+        )
+
+
