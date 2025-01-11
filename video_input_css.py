@@ -106,14 +106,13 @@ def main():
     )
 
     # Add a button to switch between front and back camera
-    
-    st.markdown(
+    if st.button('Switch Camera'):
+        st.markdown(
         """
         <script>
         switchCamera();
         </script>
         """,
-    unsafe_allow_html=True
-    )
-
+        unsafe_allow_html=True
+        )
 
