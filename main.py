@@ -1,211 +1,137 @@
-import face_recognition
-import cv2
-import numpy as np
-import os
 import streamlit as st
 import sqlite3
-from datetime import date
-from PIL import Image
-#importing my own bg module
+import main1 as fac
 import bg_image as bg
-import video_input_css as vd
+import naanthan_da_leo as leo 
+# Database setup
+conn = sqlite3.connect('login_face.db')
+c = conn.cursor()
+
+# Create users table
+c.execute('''
+CREATE TABLE IF NOT EXISTS users (
+    name TEXT NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    email TEXT NOT NULL
+)
+''')
+conn.commit()
 
 
-
-# Load DNN model files for face detection
-MODEL_PATH = "deploy.prototxt"  # Path to the prototxt file
-WEIGHTS_PATH = "res10_300x300_ssd_iter_140000.caffemodel"  # Path to the caffemodel file
-
-def load_dnn_model():
-    net = cv2.dnn.readNetFromCaffe(MODEL_PATH, WEIGHTS_PATH)
-    return net
-
-def detect_faces_dnn(net, frame):
-    """
-    Detect faces in the frame using OpenCV DNN.
-    Returns bounding boxes of detected faces.
-    """
-    (h, w) = frame.shape[:2]
-    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-    net.setInput(blob)
-    detections = net.forward()
-
-    face_boxes = []
-    for i in range(0, detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > 0.5:  # Confidence threshold
-            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-            (startX, startY, endX, endY) = box.astype("int")
-            face_boxes.append((startX, startY, endX, endY))
-    return face_boxes
-
-def main():
-    a1=st.empty()
-    b1=st.empty()
-    a=a1.title("Face Recognition Attendance System")
-    b=b1.write("Detect faces and mark attendance using your webcam image.")
-
-    # Get lecture name
+def register_user(name, username, password, email):
     try:
-        st.markdown(
-        """
-        <style>
-        /* Hide the default checkbox */
-        .stCheckbox > div:first-child {
-            display: none;
-        }
+        c.execute('INSERT INTO users (name, username, password, email) VALUES (?, ?, ?, ?)',
+                  (name, username, password, email))
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
 
-        /* Style the label as a button */
-        .stCheckbox > label {
-            background-color: #007bff; /* Blue button color */
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-block;
-            text-align: center;
-        }
 
-        /* Change button color on hover */
-        .stCheckbox > label:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
+def validate_user(username, password):
+    c.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password))
+    return c.fetchone()
 
-        /* Button active state */
-        .stCheckbox > label:active {
-            background-color: #003d80; /* Even darker blue when clicked */
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-        )
-        le=st.empty()
-        lecture_name = le.selectbox("SELECT YOU'R HOURE:",("java","bigdata","os","computer Network"),index=None,placeholder="select period",)
-        lect=lecture_name+str(date.today())
-        check=st.empty()
-        if check.checkbox("ok"):
-            a1.empty()
-            b1.empty()
-            le.empty()
-            check.empty()
-    # Set up database
-            safe_table_name = ''.join(e for e in lect if e.isalnum())  # Sanitize table name
-            
-            conn = sqlite3.connect('attendance_db.db')
-            c = conn.cursor()
-            c.execute(f"CREATE TABLE IF NOT EXISTS {safe_table_name} (name TEXT, date TEXT)")
-            conn.commit()
 
-    # Load known faces from the 'images' folder
-            bg.bg_main()
-            #st.write("Loading known faces...")
-            current_folder = os.getcwd()
-            images_folder = os.path.join(current_folder, 'images')
-            known_face_encodings = []
-            known_face_names = []
+# Initialize session state
+if "page" not in st.session_state:
+    st.session_state["page"] = "signup"  # Default to signup page
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False  # User is not logged in initially
+if "username" not in st.session_state:
+    st.session_state["username"] = None  # Store logged-in username
+
+
+# Main page content (after login)
+def main_page():
     
-        if not lecture_name:
-            st.write(" ")
-            st.stop()
+    fac.main()
+    if st.button("Logout"):
+        st.session_state["logged_in"] = False
+        st.session_state["page"] = "login"
+        st.rerun()
+
+
+# Login and signup pages
+def login_page():
+    st.markdown("""
+    <style>
+    .stMain {
+        background-image: url('https://w0.peakpx.com/wallpaper/314/578/HD-wallpaper-dark-bg-bg-wp-abstract-dark.jpg'); /* Local background image */
+        background-size: cover;
+    }
+    .stMainBlockContainer {
+        background-image: url('https://static.vecteezy.com/system/resources/previews/007/115/713/original/the-old-vintage-black-brick-wall-background-with-lighting-decoration-and-dark-tone-style-for-background-design-concept-free-photo.jpg'); /* Local login image */
+        background-size: cover;
+    }
+    .login-form {
+        background-color: rgba(0, 0, 0, 0.6);  /* Semi-transparent black */
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        width: 100%;
+        max-width: 400px;
+    }
+    h2 {
+        color: #fff;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown('''<center><h2 id="login" style="color: blue;">STAFF LOGIN</h2></center>''', unsafe_allow_html=True)
     
-        for filename in os.listdir(images_folder):
-            if filename.endswith('.jpg') or filename.endswith('.png'):
-                image_path = os.path.join(images_folder, filename)
-                name = os.path.splitext(filename)[0]  # Name from filename
-                image = face_recognition.load_image_file(image_path)
-                try:
-                    face_encoding = face_recognition.face_encodings(image, model='cnn')[0]  # Use CNN for better accuracy
-                    known_face_encodings.append(face_encoding)
-                    known_face_names.append(name)
-                except IndexError:
-                    st.warning(f"No face found in {filename}. Skipping.")
-        #st.success("Known faces loaded successfully.")
-
-    # Load DNN model for face detection
-        net = load_dnn_model()
-
-    # Capture image with Streamlit
-        if st.checkbox("upload image"):
-
-            captured_image = st.file_uploader("Choose a image file", type="jpg")
+    username = st.text_input("username",placeholder="Username")
+    password = st.text_input("Password", type="password",placeholder="password")
+    if st.button("Login"):
+        user = validate_user(username, password)
+        if user:
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+            st.success("Login successful! Redirecting to the main page...")
+            st.rerun()
         else:
-            vd.main()
-            captured_image = st.camera_input("face recognition")
+            st.error("Invalid username or password.")
 
-        if captured_image is not None:
-        # Convert the image to OpenCV format
-            image = Image.open(captured_image)
-            frame = np.array(image)
 
-        # Detect faces using DNN
-            face_boxes = detect_faces_dnn(net, frame)
+def signup_page():
+    #bg.local_bg_image()
+    leo.bg_image('https://w0.peakpx.com/wallpaper/314/578/HD-wallpaper-dark-bg-bg-wp-abstract-dark.jpg')
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] > .main {
+        background: url('leo.jpg'); /* Local background image */
+        background-size: cover;
+    }
+    </style>
+    """,unsafe_allow_html=True)
 
-        # Perform face recognition
-            face_names = []
-            for (startX, startY, endX, endY) in face_boxes:
-            # Extract the face
-                face_frame = frame[startY:endY, startX:endX]
-                rgb_face_frame = cv2.cvtColor(face_frame, cv2.COLOR_BGR2RGB)
-
-            # Encode the face
-                encodings = face_recognition.face_encodings(rgb_face_frame)
-                name = "Unknown"
-                if encodings:
-                    matches = face_recognition.compare_faces(known_face_encodings, encodings[0])
-                    face_distances = face_recognition.face_distance(known_face_encodings, encodings[0])
-                    best_match_index = np.argmin(face_distances)
-                    if matches[best_match_index]:
-                        name = known_face_names[best_match_index]
-
-            # Cache attendance and avoid redundant database checks
-                face_names.append(name)
-                if name != "Unknown":
-                    c.execute(f"SELECT * FROM {safe_table_name} WHERE name = ? AND date = ?", (name, str(date.today())))
-                    result = c.fetchone()
-                    if not result:
-                        c.execute(f"INSERT INTO {safe_table_name} (name, date) VALUES (?, ?)", (name, str(date.today())))
-                        st.success(f"Attendance marked for {name}")
-                        conn.commit()
-                    else:
-                        st.info(f"Attendance already marked for {name}")
-
-        # Annotate and display the image
-            for (startX, startY, endX, endY), name in zip(face_boxes, face_names):
-                cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 255, 0), 2)
-                cv2.rectangle(frame, (startX, endY - 35), (endX, endY), (0, 255, 0), cv2.FILLED)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(frame, name, (startX + 6, endY - 6), font, 1.0, (255, 255, 255), 1)
-
-        # Display the processed frame
-            st.image(frame, channels="BGR")
-
-    # List absent students
-        st.write("## Absent Students")
-        c.execute(f"SELECT name FROM {safe_table_name} WHERE date = ?", (str(date.today()),))
-        present_students = {row[0] for row in c.fetchall()}
-        absent_students = [name for name in known_face_names if name not in present_students]
-
-        if absent_students:
-            for student in absent_students:
-                student_image_path = os.path.join(images_folder, f"{student}.jpg")  # Assuming .jpg format
-                if os.path.exists(student_image_path):
-                    student_image = Image.open(student_image_path)
-                    a=st.button(f"Absent: {student}")
-                    if a:
-                        st.write(student)
-                        c.execute(f"INSERT INTO {safe_table_name} (name, date) VALUES (?, ?)", (student, str(date.today())))
-                        st.success(f"ATTENDANCE CHANGED successfully. {student}")
-                        conn.commit()
-                
-                else:
-                    st.write(f"Image for {student} not found.")
+    st.header("Signup")
+    name = st.text_input("Name")
+    username = st.text_input("Username")
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+    if st.button("Signup"):
+        if register_user(name, username, password, email):
+            st.success("Signup successful! You can now login.")
         else:
-            st.write("No absent students today!")
+            st.error("Username already exists. Try another one.")
 
-    # Close database connection
-        conn.close()
-    except:
-        st.write(" ")
-main()
+
+# Sidebar for navigation using a dropdown
+with st.sidebar:
+    option = ["login", "signup"]
+    select = st.selectbox("Login or Signup", option)
+
+    if select == "login":
+        st.session_state["page"] = "login"
+    else:
+        st.session_state["page"] = "signup"
+
+# Display the page based on the user's state
+if st.session_state["logged_in"]:
+    main_page()
+else:
+    if st.session_state["page"] == "login":
+        login_page()
+    elif st.session_state["page"] == "signup":
+        signup_page()
