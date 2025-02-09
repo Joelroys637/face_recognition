@@ -5,4 +5,5 @@ dlib-bin
 face_recognition==1.3.0
 opencv-python-headless
 streamlit_option_menu
+streamlit_custome_css
 streamlit
