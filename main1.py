@@ -6,10 +6,8 @@ import streamlit as st
 import sqlite3
 from datetime import date
 from PIL import Image
-#importing my own bg module
-import bg_image as bg
-#importing video css
-import video_input_css as vd
+import streamlit_custome_css as scc
+
 
 
 # Load DNN model files for face detection
@@ -40,10 +38,13 @@ def detect_faces_dnn(net, frame):
     return face_boxes
 
 def main():
-    a1=st.empty()
+    a2=st.empty()
+    #a1=st.empty()
     b1=st.empty()
-    a=a1.title("Face Recognition Attendance System")
-    b=b1.write("Detect faces and mark attendance using your webcam image.")
+    
+    html=a2.markdown('''<center><h1 style="color: MEDIUMSPRINGGREEN;">Attendance System</h1></center>''',unsafe_allow_html=True)
+    #a=a1.title("Face Recognition Attendance System")
+    b=b1.markdown('''<h4 style="color: gold;"> </h4>''',unsafe_allow_html=True)
 
     # Get lecture name
     try:
@@ -81,12 +82,27 @@ def main():
         """,
         unsafe_allow_html=True
         )
+        clas=st.empty()
         le=st.empty()
-        lecture_name = le.selectbox("SELECT YOU'R HOURE:",("java","bigdata","os","computer Network"),index=None,placeholder="select period",)
-        lect=lecture_name+str(date.today())
+        scc.bg_image("https://cdn.wallpapersafari.com/81/60/W1M7KR.jpg")
+
+
+        classes=clas.selectbox("SELECT Class: ",("I-b.sc(cs)","II-b.sc(cs)","III-b.sc(cs)"),index=None,placeholder="Class")
+        if classes=="I-b.sc(cs)":
+            lecture_name_3 = le.selectbox("SELECT I-b.sc HOURE:",("DSA","C","C++","DCF"),index=None,placeholder="Select Period",)
+        elif classes=="II-b.sc(cs)":
+            lecture_name_3 = le.selectbox("SELECT II-b.sc HOURE:",("OR","DataBase","Python","DM"),index=None,placeholder="Select Period",)
+        else:
+            lecture_name_3 = le.selectbox("SELECT III-b.sc HOURE:",("java","bigdata","os","computer Network"),index=None,placeholder="Select Period",)
+        
+        lect=lecture_name_3+str(date.today())
         check=st.empty()
         if check.checkbox("ok"):
-            a1.empty()
+            st.title(f"Your class in {lecture_name_3}")
+            scc.bg_image("https://static.wixstatic.com/media/c609bb_2b95549ff9794b86b8aba4c0ede9d563~mv2.png/v1/fill/w_940,h_600,al_c,q_90,enc_auto/c609bb_2b95549ff9794b86b8aba4c0ede9d563~mv2.png")
+            clas.empty()
+            a2.empty()
+            #a1.empty()
             b1.empty()
             le.empty()
             check.empty()
@@ -99,14 +115,14 @@ def main():
             conn.commit()
 
     # Load known faces from the 'images' folder
-            bg.bg_main()
+            
             #st.write("Loading known faces...")
             current_folder = os.getcwd()
             images_folder = os.path.join(current_folder, 'images')
             known_face_encodings = []
             known_face_names = []
-     
-        if not lecture_name:
+    
+        if not lecture_name_3:
             st.write(" ")
             st.stop()
     
@@ -131,8 +147,7 @@ def main():
 
             captured_image = st.file_uploader("Choose a image file", type="jpg")
         else:
-            vd.main()
-            captured_image = st.camera_input("face")
+            captured_image = st.camera_input("WEB CAME ATTENDANCE")
 
         if captured_image is not None:
         # Convert the image to OpenCV format
@@ -208,5 +223,3 @@ def main():
         conn.close()
     except:
         st.write(" ")
-
-
