@@ -90,10 +90,13 @@ def main():
         classes=clas.selectbox("SELECT Class: ",("I-b.sc(cs)","II-b.sc(cs)","III-b.sc(cs)"),index=None,placeholder="Class")
         if classes=="I-b.sc(cs)":
             lecture_name_3 = le.selectbox("SELECT I-b.sc HOURE:",("DSA","C","C++","DCF"),index=None,placeholder="Select Period",)
+            cl="I-year"
         elif classes=="II-b.sc(cs)":
             lecture_name_3 = le.selectbox("SELECT II-b.sc HOURE:",("OR","DataBase","Python","DM"),index=None,placeholder="Select Period",)
+            cl="II-year"
         else:
             lecture_name_3 = le.selectbox("SELECT III-b.sc HOURE:",("java","bigdata","os","computer Network"),index=None,placeholder="Select Period",)
+            cl="III-year"
         
         lect=lecture_name_3+str(date.today())
         check=st.empty()
@@ -118,7 +121,14 @@ def main():
             
             #st.write("Loading known faces...")
             current_folder = os.getcwd()
-            images_folder = os.path.join(current_folder, 'images')
+
+            if cl=="I-year":
+                images_folder = os.path.join(current_folder, 'I-year')
+            elif cl=="II-year":
+                images_folder = os.path.join(current_folder, 'II-year')
+            else:
+                images_folder = os.path.join(current_folder, 'images')
+            
             known_face_encodings = []
             known_face_names = []
     
