@@ -3,7 +3,7 @@ import sqlite3
 from streamlit_option_menu import option_menu
 import main1 as fac
 import streamlit_custome_css as leo
-
+import mail_reg as cu_mail
 
 
 
@@ -208,7 +208,8 @@ def signup_page():
         if len(password) < 8:
             st.error("Please enter a password with at least 8 characters.")
         else:
-            if register_user(name, username, password, email):
+            if register_user(name, username, password, email): 
+                cu_mail.mail_send(email,name,username,password)
                 st.success("Signup successful! You can now log in.")
             else:
                 st.error("Username already exists. Try another one.")
