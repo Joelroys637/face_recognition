@@ -100,7 +100,7 @@ def main():
         
         lect=lecture_name_3+str(date.today())
         check=st.empty()
-        if check.checkbox("ok"):
+        if check.checkbox("Take Attendance"):
             st.title(f"Your class in {lecture_name_3}")
             scc.bg_image("https://static.wixstatic.com/media/c609bb_2b95549ff9794b86b8aba4c0ede9d563~mv2.png/v1/fill/w_940,h_600,al_c,q_90,enc_auto/c609bb_2b95549ff9794b86b8aba4c0ede9d563~mv2.png")
             clas.empty()
