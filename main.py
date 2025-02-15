@@ -5,7 +5,10 @@ import main1 as fac
 import streamlit_custome_css as leo
 import mail_reg as cu_mail
 
-
+from io import BytesIO
+import pandas as pd
+from PIL import Image
+import io
 
 
 
@@ -36,15 +39,16 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
-    email TEXT NOT NULL
+    email TEXT NOT NULL,
+    image BLOB
 )
 ''')
 conn.commit()
 
 
-def register_user(name, username, password, email):
+def register_user(name, username, password, email,image):
     try:
-        c.execute('INSERT INTO users (name, username, password, email) VALUES (?, ?, ?, ?)',(name, username, password, email))
+        c.execute('INSERT INTO users (name, username, password, email, image) VALUES (?, ?, ?, ?, ?)',(name, username, password, email, image))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
@@ -67,8 +71,12 @@ if "username" not in st.session_state:
 
 # Main page content (after login)
 
-    
-
+def fetch_user_image(username):
+    c.execute("SELECT image FROM users WHERE username = ?", (username,))
+    row = c.fetchone()
+    if row and row[0]:
+        return row[0]  # Return image BLOB
+    return None
 
 # Login and signup pages
 def login_page():
@@ -103,6 +111,7 @@ def login_page():
     
     username = st.text_input("Username", placeholder="Enter Username")
     password = st.text_input("Password", type="password", placeholder="Enter Password")
+    
     # Add custom CSS to style the form and page
     st.markdown("""
         <style>
@@ -181,11 +190,17 @@ def login_page():
             st.sidebar.empty()
         else:
             pass
+        
         user = validate_user(username, password)
         if user:
+            
+            
                 # Set session state for logged-in user
             st.session_state["logged_in"] = True
             st.session_state["username"] = username
+            image_data = fetch_user_image(username)
+            if image_data:
+                st.session_state["profile_pic"] = image_data
             st.success("Login successful! Redirecting to the main page...")
             st.rerun()  # Optionally, you can redirect to another page here
         else:
@@ -199,6 +214,7 @@ def signup_page():
     st.markdown("""<center><h1>Signup</h1></center>""",unsafe_allow_html=True)
     
     name = st.text_input("Name")
+    image_file = st.file_uploader("Upload your profile image", type=["png", "jpg", "jpeg"])
     username = st.text_input("Username")
     email = st.text_input("Email")
 
@@ -208,8 +224,15 @@ def signup_page():
         if len(password) < 8:
             st.error("Please enter a password with at least 8 characters.")
         else:
-            if register_user(name, username, password, email): 
-                cu_mail.mail_send(email,name,username,password)
+            image_data = None
+            if image_file is not None:
+                image_data = image_file.read()
+            if register_user(name, username, password, email,image_data):
+                # mail sending function
+                try:
+                    cu_mail.mail_send(email,name,username,password)
+                except:
+                    st.error("pls check the correct Email id")
                 st.success("Signup successful! You can now log in.")
             else:
                 st.error("Username already exists. Try another one.")
@@ -229,10 +252,29 @@ with st.sidebar:
     
 
 
+def main_page():
+    st.title(f"Welcome  {st.session_state['username']}!")
+    
+    # Display User Profile Picture
+    if "profile_pic" in st.session_state:
+        image_data = st.session_state["profile_pic"]
+        image = Image.open(io.BytesIO(image_data))  # Convert bytes to image
+
+        st.markdown("""
+        <style>
+        img[data-testid="stLogo"] {
+            height: 4rem;
+            border-radius:20px;
+        })</style>""",unsafe_allow_html=True)
+        st.logo(image,size="large")
+    else:
+        st.warning("No profile picture found.")
 
 
 # Display the page based on the user's state
 if st.session_state["logged_in"]:
+    
+    main_page()
     fac.main()
 else:
     if st.session_state["page"] == "login":
