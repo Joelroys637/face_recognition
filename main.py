@@ -273,7 +273,7 @@ def main_page():
 
 # Display the page based on the user's state
 if st.session_state["logged_in"]:
-    
+    hide_side()
     main_page()
     fac.main()
 else:
