@@ -4,40 +4,50 @@ from streamlit_option_menu import option_menu
 import main1 as fac
 import streamlit_custome_css as leo
 import mail_reg as cu_mail
-
-from io import BytesIO
-import pandas as pd
 from PIL import Image
 import io
 
+st.markdown("""<center><h1 style="color:red;">Face Recognition Attendance System</h1></center>""",unsafe_allow_html=True)
 
 
 
+leo.header_hide()
 
-
-
-selected = option_menu(
-    menu_title="",
-    options=["login","sigup"],
-    icons=["box-arrow-in-right","person-plus"],
-    orientation="horizontal",
-)
-if selected=="login":
-    st.session_state["page"] = "login"
-else:
+# Initialize session state for hiding menu and tracking login/signup state
+if "hide_menu" not in st.session_state:
+    st.session_state.hide_menu = False
+if "page" not in st.session_state:
     st.session_state["page"] = "signup"
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+if "username" not in st.session_state:
+    st.session_state["username"] = None
 
+# Function to toggle menu visibility
+def toggle_menu():
+    st.session_state.hide_menu = not st.session_state.hide_menu
 
+# Function to hide the option menu dynamically
+def hide_option_menu():
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stHorizontalBlock"] {
+            display: none !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # Database setup
-conn = sqlite3.connect('login_face.db')
+conn = sqlite3.connect('login_face.db', check_same_thread=False)
 c = conn.cursor()
 
-# Create users table
 c.execute('''
 CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
-    username TEXT NOT NULL,
+    username TEXT PRIMARY KEY,
     password TEXT NOT NULL,
     email TEXT NOT NULL,
     image BLOB
@@ -45,46 +55,51 @@ CREATE TABLE IF NOT EXISTS users (
 ''')
 conn.commit()
 
-
-def register_user(name, username, password, email,image):
+# Function to register a new user
+def register_user(name, username, password, email, image):
     try:
         c.execute('INSERT INTO users (name, username, password, email, image) VALUES (?, ?, ?, ?, ?)',(name, username, password, email, image))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
-        return False
+        return False  # Username already exists
 
-
+# Function to validate user login
 def validate_user(username, password):
     c.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password))
     return c.fetchone()
 
-
-# Initialize session state
-if "page" not in st.session_state:
-    st.session_state["page"] = "signup"  # Default to signup page
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False  # User is not logged in initially
-if "username" not in st.session_state:
-    st.session_state["username"] = None  # Store logged-in username
-
-
-# Main page content (after login)
-
+# Fetch user profile image
 def fetch_user_image(username):
     c.execute("SELECT image FROM users WHERE username = ?", (username,))
     row = c.fetchone()
-    if row and row[0]:
-        return row[0]  # Return image BLOB
-    return None
+    return row[0] if row and row[0] else None
 
-# Login and signup pages
-def login_page():
+# Show the menu only if not hidden
+if not st.session_state.hide_menu:
+    selected = option_menu(
+        menu_title="",
+        options=["login", "signup"],
+        icons=["box-arrow-in-right", "person-plus"],
+        orientation="horizontal",
+    )
     
+    if selected == "login":
+        st.session_state["page"] = "login"
+    else:
+        st.session_state["page"] = "signup"
+
+# Button to hide/show menu
+
+
+# Login Page
+def login_page():
+
+
     st.markdown("""
     <style>
     .stMain {
-        background-image: url('https://stoutonia.com/wp-content/uploads/2018/05/beach-blur-boardwalk-132037-900x600.jpg'); /* Local background image */
+        background-image: url('https://th.bing.com/th/id/R.85983b9ac7d79c7c1152cba8a23ce5ff?rik=lRjjjbPyNSvmNw&riu=http%3a%2f%2f3.bp.blogspot.com%2f-mhK_tpzR53E%2fWZmYT0sk-GI%2fAAAAAAAAHfI%2fffaJPRth_F4OunrWGpyPXsA6GW_bMtrQwCHMYBhgL%2fs1600%2fplain-design-pattern-dark-background-image-hd-resolution-latest.jpg&ehk=KnM3VMz52RBfF0T9%2bRI2oA8qbSqbztYohceXM1vhwqk%3d&risl=&pid=ImgRaw&r=0'); /* Local background image */
         background-size: cover;
     }
     
@@ -109,10 +124,9 @@ def login_page():
     """, unsafe_allow_html=True)
     st.markdown('''<center><h2 id="login" style="color: white;">Staff Login</h2></center>''', unsafe_allow_html=True)
     
-    username = st.text_input("Username", placeholder="Enter Username")
-    password = st.text_input("Password", type="password", placeholder="Enter Password")
-    
-    # Add custom CSS to style the form and page
+    username1 = st.text_input("Username ")
+    password1 = st.text_input("Password ", type="password")
+
     st.markdown("""
         <style>
         .stApp {
@@ -156,102 +170,56 @@ def login_page():
         </style>
     """, unsafe_allow_html=True)
 
-    # Create the form for login
-    with st.form(key='login_form'):
-        
-
-        # Username and password fields
-        
-        
-        # Login button inside the form
-        submit_button = st.form_submit_button("Login")
-    st.markdown(
-    """
-    <style>
-    .link-button {
-        background: none;
-        border: none;
-        color: blue;
-        text-decoration: underline;
-        cursor: pointer;
-        font-size: 16px;
-    }
-    .link-button:hover {
-        color: darkblue;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-    )
     
-        # When the form is submitted, authenticate the user
-    if submit_button:
-        if selected in ["Signup", "Login"]:
-            st.sidebar.empty()
-        else:
-            pass
-        
-        user = validate_user(username, password)
+    if st.button("Login",on_click=toggle_menu):
+        user = validate_user(username1, password1)
         if user:
-            
-            
-                # Set session state for logged-in user
             st.session_state["logged_in"] = True
-            st.session_state["username"] = username
-            image_data = fetch_user_image(username)
-            if image_data:
-                st.session_state["profile_pic"] = image_data
-            st.success("Login successful! Redirecting to the main page...")
-            st.rerun()  # Optionally, you can redirect to another page here
+            st.session_state["username"] = username1
+            st.session_state["profile_pic"] = fetch_user_image(username1)
+            st.success("Login successful! Redirecting...")
+            st.rerun()
         else:
             st.error("Invalid username or password.")
-    
 
-
+# Signup Page
 def signup_page():
+
+
     leo.bg_image('https://i.pinimg.com/originals/ff/04/31/ff0431d11ff6b73e937280252f58f371.gif')
     
     st.markdown("""<center><h1>Signup</h1></center>""",unsafe_allow_html=True)
-    
-    name = st.text_input("Name")
-    image_file = st.file_uploader("Upload your profile image", type=["png", "jpg", "jpeg"])
-    username = st.text_input("Username")
-    email = st.text_input("Email")
+    name = st.text_input("Name",placeholder="Enter Name")
+    username = st.text_input("Username",placeholder="Enter Username")
+    email = st.text_input("Email",placeholder="Enter Email")
+    password = st.text_input("Password", type="password",placeholder="Enter password")
+    image_file = st.file_uploader("Upload Profile Picture", type=["png", "jpg", "jpeg"])
 
-    password = st.text_input("Password", type="password",placeholder="enter you valid password")
     if st.button("Signup"):
-
         if len(password) < 8:
-            st.error("Please enter a password with at least 8 characters.")
+            st.error("Password must be at least 8 characters.")
         else:
-            image_data = None
-            if image_file is not None:
-                image_data = image_file.read()
-            if register_user(name, username, password, email,image_data):
-                # mail sending function
-                try:
-                    cu_mail.mail_send(email,name,username,password)
-                except:
-                    st.error("pls check the correct Email id")
-                st.success("Signup successful! You can now log in.")
+            image_data = image_file.read() if image_file else None
+            if register_user(name, username, password, email, image_data):
+                cu_mail.mail_send(email, name, username, password)
+                st.success("Signup successful! Please login.")
+                
             else:
-                st.error("Username already exists. Try another one.")
+                st.error("Username already exists.")
 
-def hide_side():
-# Sidebar for navigation using a dropdown
+# Sidebar with Logout
+def sidebar():
     with st.sidebar:
         leo.sidebar_bg_image('https://t3.ftcdn.net/jpg/02/32/99/54/360_F_232995426_xAopAAEterBrZhcC1CXLVtCF6RhYF5Z3.jpg')
-        st.markdown("""
-        <h1 style='font-size: 30px; font-family: "Arial", sans-serif;'>Login or Signup</h1>
-        """, unsafe_allow_html=True)
-    
+        
         if st.button("Logout"):
             st.session_state["logged_in"] = False
             st.session_state["page"] = "login"
+            st.session_state["username"] = None
+            st.session_state.hide_menu = False
             st.rerun()
-    
 
-
+# Main Page after login
 def main_page():
     st.title(f"Welcome  {st.session_state['username']}!")
     
@@ -269,15 +237,17 @@ def main_page():
         st.logo(image,size="large")
     else:
         st.warning("No profile picture found.")
+    
 
-
-# Display the page based on the user's state
+# Control flow for login/signup
 if st.session_state["logged_in"]:
-    hide_side()
     main_page()
     fac.main()
+    hide_option_menu()
+    sidebar()
+    
 else:
     if st.session_state["page"] == "login":
         login_page()
-    elif st.session_state["page"] == "signup":
+    else:
         signup_page()
