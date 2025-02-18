@@ -28,7 +28,7 @@ else:
     st.session_state["page"] = "signup"
 
 
-leo.header_hide()
+
 # Database setup
 conn = sqlite3.connect('login_face.db')
 c = conn.cursor()
