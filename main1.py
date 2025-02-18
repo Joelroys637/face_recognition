@@ -89,13 +89,13 @@ def main():
 
         classes=clas.selectbox("SELECT Class: ",("I-b.sc(cs)","II-b.sc(cs)","III-b.sc(cs)"),index=None,placeholder="Class")
         if classes=="I-b.sc(cs)":
-            lecture_name_3 = le.selectbox("SELECT I-b.sc HOURE:",("DSA","C","C++","DCF"),index=None,placeholder="Select Period",)
+            lecture_name_3 = le.selectbox("SELECT HOURE:",("DSA","C","C++","DCF"),index=None,placeholder="Select Period",)
             cl="I-year"
         elif classes=="II-b.sc(cs)":
-            lecture_name_3 = le.selectbox("SELECT II-b.sc HOURE:",("OR","DataBase","Python","DM"),index=None,placeholder="Select Period",)
+            lecture_name_3 = le.selectbox("SELECT HOURE:",("OR","DataBase","Python","DM"),index=None,placeholder="Select Period",)
             cl="II-year"
         else:
-            lecture_name_3 = le.selectbox("SELECT III-b.sc HOURE:",("java","bigdata","os","computer Network"),index=None,placeholder="Select Period",)
+            lecture_name_3 = le.selectbox("SELECT HOURE:",("java","bigdata","os","computer Network"),index=None,placeholder="Select Period",)
             cl="III-year"
         
         lect=lecture_name_3+str(date.today())
