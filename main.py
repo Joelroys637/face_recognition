@@ -237,18 +237,18 @@ def signup_page():
             else:
                 st.error("Username already exists. Try another one.")
 
-
+def hide_side():
 # Sidebar for navigation using a dropdown
-with st.sidebar:
-    leo.sidebar_bg_image('https://t3.ftcdn.net/jpg/02/32/99/54/360_F_232995426_xAopAAEterBrZhcC1CXLVtCF6RhYF5Z3.jpg')
-    st.markdown("""
-    <h1 style='font-size: 30px; font-family: "Arial", sans-serif;'>Login or Signup</h1>
-""", unsafe_allow_html=True)
+    with st.sidebar:
+        leo.sidebar_bg_image('https://t3.ftcdn.net/jpg/02/32/99/54/360_F_232995426_xAopAAEterBrZhcC1CXLVtCF6RhYF5Z3.jpg')
+        st.markdown("""
+        <h1 style='font-size: 30px; font-family: "Arial", sans-serif;'>Login or Signup</h1>
+        """, unsafe_allow_html=True)
     
-    if st.button("Logout"):
-        st.session_state["logged_in"] = False
-        st.session_state["page"] = "login"
-        st.rerun()
+        if st.button("Logout"):
+            st.session_state["logged_in"] = False
+            st.session_state["page"] = "login"
+            st.rerun()
     
 
 
