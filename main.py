@@ -11,7 +11,7 @@ st.markdown("""<center><h1 style="color:red;">Face Recognition Attendance System
 
 
 
-leo.header_hide()
+
 
 # Initialize session state for hiding menu and tracking login/signup state
 if "hide_menu" not in st.session_state:
@@ -29,7 +29,7 @@ def toggle_menu():
 
 # Function to hide the option menu dynamically
 def hide_option_menu():
-    st.markdown(
+    '''st.markdown(
         """
         <style>
         div[data-testid="stHorizontalBlock"] {
@@ -38,7 +38,7 @@ def hide_option_menu():
         </style>
         """,
         unsafe_allow_html=True,
-    )
+    )'''
 
 # Database setup
 conn = sqlite3.connect('login_face.db', check_same_thread=False)
@@ -122,7 +122,7 @@ def login_page():
     }
     </style>
     """, unsafe_allow_html=True)
-    st.markdown('''<center><h2 id="login" style="color: white;">Staff Login</h2></center>''', unsafe_allow_html=True)
+    #st.markdown('''<center><h2 id="login" style="color: white;">Staff Login</h2></center>''', unsafe_allow_html=True)
     
     username1 = st.text_input("Username ")
     password1 = st.text_input("Password ", type="password")
@@ -243,6 +243,8 @@ def main_page():
 if st.session_state["logged_in"]:
     main_page()
     fac.main()
+    
+    
     hide_option_menu()
     sidebar()
     
