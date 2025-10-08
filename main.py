@@ -155,13 +155,7 @@ def login_page():
             align-items: center;
         }
 
-        .stButton button {
-            display: block;
-            width: 50%;  /* Make button width smaller and center */
-            margin-top: 20px;  /* Space above the button */
-            margin-left: auto;
-            margin-right: auto;
-        }
+        
 
         h2 {
             color: white;
@@ -253,3 +247,4 @@ else:
         login_page()
     else:
         signup_page()
+
