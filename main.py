@@ -10,7 +10,6 @@ import io
 st.markdown("""<center><h1 style="color:red;">Face Recognition Attendance System</h1></center>""",unsafe_allow_html=True)
 
 
-st.write("hello')
 
 
 # Initialize session state for hiding menu and tracking login/signup state
@@ -103,12 +102,7 @@ def login_page():
         background-size: cover;
     }
     
-    .login-button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-    }
+    
     .login-form {
         background-color: rgba(0, 0, 0, 0.6);  /* Semi-transparent black */
         padding: 20px;
@@ -247,5 +241,6 @@ else:
         login_page()
     else:
         signup_page()
+
 
 
