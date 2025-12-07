@@ -191,12 +191,15 @@ def signup_page():
                 image_data = image_file.read() if image_file else None
             else:
                 st.error("profile picture is must upload")
-            if register_user(name, username, password, email, image_data):
-                cu_mail.mail_send(email, name, username, password)
-                st.success("Signup successful! Please login.")
+            try:
+                if register_user(name, username, password, email, image_data):
+                    cu_mail.mail_send(email, name, username, password)
+                    st.success("Signup successful! Please login.")
                 
-            else:
-                st.error("Username already exists.")
+                else:
+                    st.error("Username already exists.")
+            except:
+                pass
 
 # Sidebar with Logout
 def sidebar():
@@ -244,6 +247,7 @@ else:
         login_page()
     else:
         signup_page()
+
 
 
 
