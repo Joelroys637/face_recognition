@@ -187,7 +187,10 @@ def signup_page():
         if len(password) < 8:
             st.error("Password must be at least 8 characters.")
         else:
-            image_data = image_file.read() if image_file else None
+            if image_file:
+                image_data = image_file.read() if image_file else None
+            else:
+                st.error("profile picture is must upload")
             if register_user(name, username, password, email, image_data):
                 cu_mail.mail_send(email, name, username, password)
                 st.success("Signup successful! Please login.")
@@ -241,6 +244,7 @@ else:
         login_page()
     else:
         signup_page()
+
 
 
 
