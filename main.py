@@ -7,7 +7,7 @@ import mail_reg as cu_mail
 from PIL import Image
 import io
 
-st.markdown("""<center><h1 style="color:red;">Face Recognition Attendance System</h1></center>""",unsafe_allow_html=True)
+st.markdown("""<center><h1 style="color:red;">Face Recognition Attendance</h1></center>""",unsafe_allow_html=True)
 
 
 
@@ -247,6 +247,7 @@ else:
         login_page()
     else:
         signup_page()
+
 
 
 
