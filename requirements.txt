@@ -7,4 +7,4 @@ opencv-python-headless
 streamlit_option_menu
 streamlit_custome_css
 pyttsx3
-streamlit
+streamlit==1.41.1
